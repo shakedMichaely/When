@@ -1,22 +1,37 @@
+const axios = require('axios');
+
 /**
- * Fetches flight information from an external API.
+ * Fetches flight information from an external API (AviationStack).
  */
-async function getFlightEta(flightNumber, date) {
-  // TODO: Integrate with real API like AviationStack or FlightLabs
-  // const apiKey = process.env.FLIGHT_API_KEY;
-  // const response = await axios.get(`API_URL?access_key=${apiKey}&flight_iata=${flightNumber}`);
+async function getFlightEta(flightNumber) {
+  const apiKey = process.env.FLIGHT_API_KEY;
+  if (!apiKey) {
+    throw new Error('FLIGHT_API_KEY is not configured in .env');
+  }
+
+  // Note: AviationStack free tier uses HTTP
+  const url = `http://api.aviationstack.com/v1/flights?access_key=${apiKey}&flight_iata=${flightNumber}`;
   
-  console.log(`Fetching data for flight ${flightNumber} on ${date}`);
+  console.log(`Fetching data for flight ${flightNumber} from AviationStack...`);
+  const response = await axios.get(url);
+  
+  const flightData = response.data.data;
+  
+  if (!flightData || flightData.length === 0) {
+    throw new Error(`No flight data found for flight number: ${flightNumber}`);
+  }
 
-  // Mocking the response for MVP
-  // Assuming the flight lands in 4 hours from now
-  const eta = new Date();
-  eta.setHours(eta.getHours() + 4);
-
+  // Get the most relevant flight object (usually the first one)
+  const flight = flightData[0];
+  
   return {
-    flightNumber,
-    status: 'scheduled',
-    eta: eta.toISOString(),
+    flightNumber: flight.flight.iata,
+    airline: flight.airline.name,
+    status: flight.flight_status,
+    departureTime: flight.departure.scheduled,
+    eta: flight.arrival.estimated || flight.arrival.scheduled,
+    arrivalTerminal: flight.arrival.terminal,
+    arrivalGate: flight.arrival.gate,
   };
 }
 

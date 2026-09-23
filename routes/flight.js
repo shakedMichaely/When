@@ -1,29 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const flightService = require('../services/flightService');
-const timeService = require('../services/timeService');
 
 router.post('/calculate-departure', async (req, res) => {
   try {
-    const { flightNumber, date } = req.body;
+    const { flightNumber } = req.body;
     
-    if (!flightNumber || !date) {
-      return res.status(400).json({ error: 'flightNumber and date are required.' });
+    if (!flightNumber) {
+      return res.status(400).json({ error: 'flightNumber is required.' });
     }
 
-    // 1. Get flight ETA
-    const flightInfo = await flightService.getFlightEta(flightNumber, date);
+    // Get real flight data from the API
+    const flightInfo = await flightService.getFlightEta(flightNumber);
     
-    // 2. Calculate departure time from Ramat Gan
-    const departureInfo = await timeService.calculateDepartureTime(flightInfo.eta);
-
+    // We are skipping the travel time calculation for now
     res.json({
+      success: true,
       flight: flightInfo,
-      departure: departureInfo
+      message: 'Flight data fetched successfully. Travel calculation is disabled for now.'
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'An error occurred while calculating departure time.' });
+    console.error(error.message);
+    res.status(500).json({ error: error.message || 'An error occurred while fetching flight data.' });
   }
 });
 
