@@ -39,9 +39,18 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
             : 'לא ידוע';
 
         const depActualDate = data.flight.departureActual ? new Date(data.flight.departureActual) : null;
-        const formattedDepActual = depActualDate 
-            ? depActualDate.toLocaleTimeString('he-IL', formatOptions)
-            : 'טרם המריאה';
+        const depScheduledDate = data.flight.departureScheduled ? new Date(data.flight.departureScheduled) : null;
+        
+        let formattedDepText = 'לא ידוע';
+        if (depScheduledDate) {
+            formattedDepText = depScheduledDate.toLocaleTimeString('he-IL', formatOptions);
+            if (depActualDate) {
+                const actualTimeStr = depActualDate.toLocaleTimeString('he-IL', formatOptions);
+                if (data.flight.departureDelay > 0 || actualTimeStr !== formattedDepText) {
+                    formattedDepText += ` (בפועל: ${actualTimeStr})`;
+                }
+            }
+        }
 
         // Calculate Duration (if possible)
         let durationStr = '--';
@@ -89,7 +98,7 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
         
         const didTakeoff = !!data.flight.departureActual;
         document.getElementById('resDidTakeoff').textContent = didTakeoff ? 'כן 🛫' : 'לא';
-        document.getElementById('resDeparture').textContent = formattedDepActual;
+        document.getElementById('resDeparture').textContent = formattedDepText;
         
         document.getElementById('resEta').textContent = formattedEta;
         document.getElementById('resAirline').textContent = `${data.flight.airline || 'לא ידוע'} (${data.flight.flightNumber || flightNumber})`;
