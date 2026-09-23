@@ -35,6 +35,7 @@ async function getFlightEta(flightNumber) {
     destinationIata: flight.arrival.iata,
     status: flight.flight_status,
     departureScheduled: flight.departure.scheduled,
+    departureEstimated: flight.departure.estimated,
     departureActual: flight.departure.actual,
     departureDelay: flight.departure.delay,
     eta: flight.arrival.estimated || flight.arrival.scheduled,

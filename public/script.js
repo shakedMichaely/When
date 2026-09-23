@@ -38,16 +38,28 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
             ? etaDate.toLocaleTimeString('he-IL', formatOptions) + ' (' + etaDate.toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) + ')'
             : 'לא ידוע';
 
-        const depActualDate = data.flight.departureActual ? new Date(data.flight.departureActual) : null;
         const depScheduledDate = data.flight.departureScheduled ? new Date(data.flight.departureScheduled) : null;
+        let depActualDate = data.flight.departureActual ? new Date(data.flight.departureActual) : null;
+        const depEstimatedDate = data.flight.departureEstimated ? new Date(data.flight.departureEstimated) : null;
         
         let formattedDepText = 'לא ידוע';
+        let isEstimated = false;
+
         if (depScheduledDate) {
             formattedDepText = depScheduledDate.toLocaleTimeString('he-IL', formatOptions);
-            if (depActualDate) {
-                const actualTimeStr = depActualDate.toLocaleTimeString('he-IL', formatOptions);
+            
+            // If actual isn't available but there's an estimated time with a delay, use estimated
+            let displayDate = depActualDate;
+            if (!displayDate && depEstimatedDate && data.flight.departureDelay > 0) {
+                displayDate = depEstimatedDate;
+                isEstimated = true;
+            }
+
+            if (displayDate) {
+                const actualTimeStr = displayDate.toLocaleTimeString('he-IL', formatOptions);
                 if (data.flight.departureDelay > 0 || actualTimeStr !== formattedDepText) {
-                    formattedDepText += ` (בפועל: ${actualTimeStr})`;
+                    const label = isEstimated ? 'משוער' : 'בפועל';
+                    formattedDepText += ` (${label}: ${actualTimeStr})`;
                 }
             }
         }
@@ -55,7 +67,7 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
         // Calculate Duration (if possible)
         let durationStr = '--';
         if (etaDate && data.flight.departureScheduled) {
-            const depDate = depActualDate || new Date(data.flight.departureScheduled);
+            const depDate = depActualDate || depEstimatedDate || new Date(data.flight.departureScheduled);
             const diffMs = etaDate - depDate;
             if (diffMs > 0) {
                 const hours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -96,7 +108,9 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
         }
         document.getElementById('resDelay').textContent = delayText;
         
-        const didTakeoff = !!data.flight.departureActual;
+        const isLanded = rawStatus === 'landed';
+        const isActive = rawStatus === 'active';
+        const didTakeoff = !!data.flight.departureActual || isLanded || isActive;
         document.getElementById('resDidTakeoff').textContent = didTakeoff ? 'כן 🛫' : 'לא';
         document.getElementById('resDeparture').textContent = formattedDepText;
         
