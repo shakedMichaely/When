@@ -44,29 +44,47 @@
         </div>
 
         <!-- Results -->
-        <div id="results" class="hidden mt-8 border-t pt-6">
+        <div id="results" class="hidden mt-8">
             <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">פרטי הטיסה</h2>
             
+            <!-- Route Visual -->
+            <div class="flex items-center justify-between bg-blue-50 p-4 rounded-xl mb-4 border border-blue-100">
+                <div class="text-center w-1/3">
+                    <div id="resOriginIata" class="text-2xl font-bold text-blue-700 font-mono">--</div>
+                    <div id="resOrigin" class="text-xs text-gray-500 mt-1 truncate" dir="ltr">--</div>
+                </div>
+                <div class="flex flex-col items-center justify-center w-1/3 px-2">
+                    <span id="resDuration" class="text-xs text-gray-500 font-semibold mb-1">--</span>
+                    <div class="w-full h-px bg-blue-300 relative">
+                        <i class="fa-solid fa-plane text-blue-600 absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 rotate-180 bg-blue-50 px-2"></i>
+                    </div>
+                </div>
+                <div class="text-center w-1/3">
+                    <div id="resDestIata" class="text-2xl font-bold text-blue-700 font-mono">--</div>
+                    <div id="resDest" class="text-xs text-gray-500 mt-1 truncate" dir="ltr">--</div>
+                </div>
+            </div>
+
             <div class="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-500 text-sm">חברת תעופה</span>
-                    <span id="resAirline" class="font-semibold text-gray-800">--</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 text-sm">מספר טיסה</span>
-                    <span id="resFlightNum" class="font-semibold text-gray-800" dir="ltr">--</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 text-sm">מסלול</span>
-                    <span id="resRoute" class="font-semibold text-gray-800 text-left" dir="ltr">--</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-gray-500 text-sm">סטטוס</span>
+                    <span class="text-gray-500 text-sm">סטטוס מנוע</span>
                     <span id="resStatus" class="font-semibold px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs">--</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500 text-sm">האם המריאה?</span>
+                    <span id="resDidTakeoff" class="font-semibold text-gray-800">--</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500 text-sm">זמן המראה בפועל</span>
+                    <span id="resDeparture" class="font-semibold text-gray-800" dir="ltr">--</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-gray-500 text-sm">זמן נחיתה משוער</span>
                     <span id="resEta" class="font-bold text-blue-600" dir="ltr">--</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-500 text-sm">חברת תעופה</span>
+                    <span id="resAirline" class="font-semibold text-gray-800">--</span>
                 </div>
                 <div class="flex justify-between items-center">
                     <span class="text-gray-500 text-sm">טרמינל / שער</span>

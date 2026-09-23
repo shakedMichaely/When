@@ -30,22 +30,46 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
             throw new Error(data.error || 'שגיאה בשליפת הנתונים');
         }
 
-        // Format Date (Force Israel Timezone)
+        // Format Dates (Force Israel Timezone)
+        const formatOptions = { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' };
+        
         const etaDate = data.flight.eta ? new Date(data.flight.eta) : null;
         const formattedEta = etaDate 
-            ? etaDate.toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' }) + ' (' + etaDate.toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) + ')'
+            ? etaDate.toLocaleTimeString('he-IL', formatOptions) + ' (' + etaDate.toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) + ')'
             : 'לא ידוע';
 
+        const depActualDate = data.flight.departureActual ? new Date(data.flight.departureActual) : null;
+        const formattedDepActual = depActualDate 
+            ? depActualDate.toLocaleTimeString('he-IL', formatOptions)
+            : 'טרם המריאה';
+
+        // Calculate Duration (if possible)
+        let durationStr = '--';
+        if (etaDate && data.flight.departureScheduled) {
+            const depDate = depActualDate || new Date(data.flight.departureScheduled);
+            const diffMs = etaDate - depDate;
+            if (diffMs > 0) {
+                const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                durationStr = `${hours}h ${minutes}m`;
+            }
+        }
+
         // Update UI
-        document.getElementById('resAirline').textContent = data.flight.airline || 'לא ידוע';
-        document.getElementById('resFlightNum').textContent = data.flight.flightNumber || flightNumber;
-        
-        const origin = data.flight.origin || 'N/A';
-        const destination = data.flight.destination || 'N/A';
-        document.getElementById('resRoute').textContent = `${origin} ➔ ${destination}`;
+        document.getElementById('resOriginIata').textContent = data.flight.originIata || 'N/A';
+        document.getElementById('resOrigin').textContent = data.flight.origin || 'N/A';
+        document.getElementById('resDestIata').textContent = data.flight.destinationIata || 'N/A';
+        document.getElementById('resDest').textContent = data.flight.destination || 'N/A';
+        document.getElementById('resDuration').textContent = durationStr;
 
         document.getElementById('resStatus').textContent = (data.flight.status || 'לא ידוע').toUpperCase();
+        
+        const didTakeoff = !!data.flight.departureActual;
+        document.getElementById('resDidTakeoff').textContent = didTakeoff ? 'כן 🛫' : 'לא';
+        document.getElementById('resDeparture').textContent = formattedDepActual;
+        
         document.getElementById('resEta').textContent = formattedEta;
+        document.getElementById('resAirline').textContent = `${data.flight.airline || 'לא ידוע'} (${data.flight.flightNumber || flightNumber})`;
         
         const terminal = data.flight.arrivalTerminal || '?';
         const gate = data.flight.arrivalGate || '?';
