@@ -15,6 +15,8 @@ async function getFlightEta(flightNumber) {
   console.log(`Fetching data for flight ${flightNumber} from AviationStack...`);
   const response = await axios.get(url);
   
+  console.log("API RAW DATA:", JSON.stringify(response.data, null, 2));
+
   const flightData = response.data.data;
   
   if (!flightData || flightData.length === 0) {

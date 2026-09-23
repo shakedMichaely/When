@@ -9,11 +9,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-app.use('/api/flights', flightRoutes);
+app.use(express.static('public'));
 
-app.get('/', (req, res) => {
-  res.send('Flight Tracker API is running.');
-});
+app.use('/api/flights', flightRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
