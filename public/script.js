@@ -54,6 +54,12 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
                 displayDate = depEstimatedDate;
                 isEstimated = true;
             }
+            
+            // If still no display date but we have a delay, calculate it manually
+            if (!displayDate && data.flight.departureDelay > 0) {
+                displayDate = new Date(depScheduledDate.getTime() + data.flight.departureDelay * 60000);
+                isEstimated = true;
+            }
 
             if (displayDate) {
                 const actualTimeStr = displayDate.toLocaleTimeString('he-IL', formatOptions);
