@@ -48,22 +48,17 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
         if (depScheduledDate) {
             formattedDepText = depScheduledDate.toLocaleTimeString('he-IL', formatOptions);
             
-            // If actual isn't available but there's an estimated time with a delay, use estimated
+            // If actual isn't available but there's an estimated time, use estimated
             let displayDate = depActualDate;
-            if (!displayDate && depEstimatedDate && data.flight.departureDelay > 0) {
+            if (!displayDate && depEstimatedDate) {
                 displayDate = depEstimatedDate;
-                isEstimated = true;
-            }
-            
-            // If still no display date but we have a delay, calculate it manually
-            if (!displayDate && data.flight.departureDelay > 0) {
-                displayDate = new Date(depScheduledDate.getTime() + data.flight.departureDelay * 60000);
                 isEstimated = true;
             }
 
             if (displayDate) {
                 const actualTimeStr = displayDate.toLocaleTimeString('he-IL', formatOptions);
-                if (data.flight.departureDelay > 0 || actualTimeStr !== formattedDepText) {
+                const delayMs = displayDate - depScheduledDate;
+                if (delayMs > 0 || actualTimeStr !== formattedDepText) {
                     const label = isEstimated ? 'משוער' : 'בפועל';
                     formattedDepText += ` (${label}: ${actualTimeStr})`;
                 }
@@ -101,16 +96,21 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
         const rawStatus = (data.flight.status || '').toLowerCase();
         document.getElementById('resStatus').textContent = statusMap[rawStatus] || rawStatus.toUpperCase();
         
-        // Handle Delays
-        let delayText = 'אין עיכוב';
-        const depDelay = data.flight.departureDelay;
-        const arrDelay = data.flight.arrivalDelay;
+        // Calculate True Delays from Timestamps
+        let calcDepDelay = 0;
+        let calcArrDelay = 0;
+
+        const activeDate = depActualDate || depEstimatedDate;
+        if (depScheduledDate && activeDate) {
+            calcDepDelay = Math.max(0, Math.round((activeDate - depScheduledDate) / 60000));
+        }
+
+        const arrScheduledDate = data.flight.eta ? new Date(data.flight.eta) : null; // Wait, we only passed ETA. We need both.
+        // Let's just calculate departure delay based on displayDate, and ignore the buggy raw API delay fields.
         
-        if (depDelay > 0 || arrDelay > 0) {
-            const parts = [];
-            if (depDelay > 0) parts.push(`המראה: ${depDelay} דק'`);
-            if (arrDelay > 0) parts.push(`נחיתה: ${arrDelay} דק'`);
-            delayText = parts.join(' | ');
+        let delayText = 'אין עיכוב';
+        if (calcDepDelay > 0) {
+            delayText = `עיכוב: ${calcDepDelay} דק'`;
         }
         document.getElementById('resDelay').textContent = delayText;
         
