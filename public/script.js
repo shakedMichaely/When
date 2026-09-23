@@ -62,7 +62,30 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
         document.getElementById('resDest').textContent = data.flight.destination || 'N/A';
         document.getElementById('resDuration').textContent = durationStr;
 
-        document.getElementById('resStatus').textContent = (data.flight.status || 'לא ידוע').toUpperCase();
+        // Translate Status
+        const statusMap = {
+            'scheduled': 'מתוכננת',
+            'active': 'באוויר',
+            'landed': 'נחתה',
+            'cancelled': 'בוטלה',
+            'incident': 'תקרית',
+            'diverted': 'הוסטה'
+        };
+        const rawStatus = (data.flight.status || '').toLowerCase();
+        document.getElementById('resStatus').textContent = statusMap[rawStatus] || rawStatus.toUpperCase();
+        
+        // Handle Delays
+        let delayText = 'אין עיכוב';
+        const depDelay = data.flight.departureDelay;
+        const arrDelay = data.flight.arrivalDelay;
+        
+        if (depDelay > 0 || arrDelay > 0) {
+            const parts = [];
+            if (depDelay > 0) parts.push(`המראה: ${depDelay} דק'`);
+            if (arrDelay > 0) parts.push(`נחיתה: ${arrDelay} דק'`);
+            delayText = parts.join(' | ');
+        }
+        document.getElementById('resDelay').textContent = delayText;
         
         const didTakeoff = !!data.flight.departureActual;
         document.getElementById('resDidTakeoff').textContent = didTakeoff ? 'כן 🛫' : 'לא';
