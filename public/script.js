@@ -30,15 +30,20 @@ document.getElementById('flightForm').addEventListener('submit', async (e) => {
             throw new Error(data.error || 'שגיאה בשליפת הנתונים');
         }
 
-        // Format Date
+        // Format Date (Force Israel Timezone)
         const etaDate = data.flight.eta ? new Date(data.flight.eta) : null;
         const formattedEta = etaDate 
-            ? etaDate.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }) + ' (' + etaDate.toLocaleDateString('he-IL') + ')'
+            ? etaDate.toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' }) + ' (' + etaDate.toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' }) + ')'
             : 'לא ידוע';
 
         // Update UI
         document.getElementById('resAirline').textContent = data.flight.airline || 'לא ידוע';
         document.getElementById('resFlightNum').textContent = data.flight.flightNumber || flightNumber;
+        
+        const origin = data.flight.origin || 'N/A';
+        const destination = data.flight.destination || 'N/A';
+        document.getElementById('resRoute').textContent = `${origin} ➔ ${destination}`;
+
         document.getElementById('resStatus').textContent = (data.flight.status || 'לא ידוע').toUpperCase();
         document.getElementById('resEta').textContent = formattedEta;
         
